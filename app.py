@@ -11,7 +11,7 @@ YDL_OPTS = {
     'format': 'best',
     'extractor_args': {
         'youtube': {
-            'player_client': ['android', 'web']
+            'player_client': ['ios', 'web']
         }
     }
 }
@@ -30,27 +30,38 @@ def get_stream(video_id):
     
     try:
         with yt_dlp.YoutubeDL(YDL_OPTS) as ydl:
-            # extract_info with download=False gets the metadata
             info = ydl.extract_info(url, download=False)
             
-            # Check for live stream master manifest first
             if info.get('is_live'):
-                stream_url = info.get('manifest_url')
-                if not stream_url:
-                    stream_url = info.get('url')
+                stream_url = info.get('manifest_url') or info.get('url')
             else:
-                # If it's a VOD (not live), just get the best url
                 stream_url = info.get('url')
                 
             if stream_url:
-                # Redirect the player directly to the stream URL
                 return redirect(stream_url, code=302)
             else:
                 return jsonify({"error": "Stream URL not found"}), 404
                 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        error_msg = str(e)
+        # If Vercel IP gets blocked by YouTube bot detection, fallback to a public API
+        if "confirm you're not a bot" in error_msg.lower():
+            # Fallback to a reliable Piped proxy to get the stream JSON
+            import requests
+            try:
+                # Try fetching from piped API
+                resp = requests.get(f"https://pipedapi.kavin.rocks/streams/{video_id}", timeout=5)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("hls"):
+                        return redirect(data["hls"], code=302)
+            except:
+                pass
+            
+            # If all else fails, redirect to a public proxy player
+            return redirect(f"https://youtube.m3u8.tv/{video_id}", code=302)
+            
+        return jsonify({"error": error_msg}), 500
 
 if __name__ == '__main__':
-    # Run locally on port 5000
     app.run(host='0.0.0.0', port=5000)
