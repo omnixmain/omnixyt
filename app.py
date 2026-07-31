@@ -9,6 +9,11 @@ YDL_OPTS = {
     'no_warnings': True,
     'skip_download': True,
     'format': 'best',
+    'extractor_args': {
+        'youtube': {
+            'player_client': ['android', 'web']
+        }
+    }
 }
 
 @app.route('/')
