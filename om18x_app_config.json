@@ -1,0 +1,13 @@
+{
+  "status": "success",
+  "app_name": "OM18X",
+  "application_id": "com.omnixempire.om18x",
+  "version_code": 1,
+  "version_name": "1.0",
+  "official_website": "https://omnixempire.pages.dev/",
+  "official_telegram": "https://t.me/omnixempire",
+  "download_url": "https://omnixempire.pages.dev/",
+  "force_update": true,
+  "title": "Official Update Required",
+  "message": "A new official version of OM18X is available or app integrity check failed. Please update from the official source to continue watching."
+}
